@@ -6,9 +6,6 @@
 #include <math.h>
 #include <string.h>
 
-#define MIN_BID 1
-#define BID_STEP 1
-#define BIDDERS 2
 #define TRUE 1
 
 #define LEVEL 4
@@ -21,7 +18,11 @@ char * createOutputArray(char * output, char nextText[], int * index) {
         x++;
     }
     temp = (char *) malloc(sizeof(char) * (*index+x+1));
-    memcpy(temp, output, *index);
+    if(temp == NULL) {
+        printf("Error allocating memory!");
+        return '\0';
+    }
+    memcpy(temp, output, (size_t) *index);
     free(output);
     output = temp;
     for(int i = 0; i < x; i++) {
@@ -34,30 +35,32 @@ char * createOutputArray(char * output, char nextText[], int * index) {
 
 
 int inverseNumbers(char * numberArray, int count) {
-    int helper = 0;
+    char helper = 0;
     for(int x = 0; x < count/2; x++) {
         helper = numberArray[x];
         numberArray[x] = numberArray[count-1-x];
         numberArray[count-1-x] = helper;
     }
+    return 0;
 }
 
 
 int intToChar(char * array, int number, int inverse) {
     int count = 0;
     for (; number != 0; number = number / 10) {
-        array[count++] = (number % 10) + '0';
+        array[count++] = (char) ((number % 10) + '0');
     }
     array[count] = '\0';
     if(inverse && number >= 10) {
         inverseNumbers(array, count);
     }
+    return 0;
 }
 
 
-int getNextBid(char * input, int * offset) {
+unsigned int getNextBid(char * input, int * offset) {
     int count = 0;
-    int bid = 0;
+    unsigned int bid = 0;
     while(input[count+*offset] != ',' && input[count+*offset] != '\0') {
         count++;
     }
@@ -81,12 +84,14 @@ int getNextBidder(char * input, int *offset, char * act_bidder) {
     act_bidder = (char*) realloc(act_bidder, sizeof(char)*count);
     if(act_bidder == NULL) {
         printf("Error reallocating memory!\n");
+        return -1;
     }
     for(int x = 0; x < count; x++) {
         act_bidder[x] = input[*offset+x];
     }
     act_bidder[count] = '\0';
     *offset = *offset + count + 1;
+    return 0;
 }
 
 int main(int argc, char* argv[]) {
@@ -98,8 +103,7 @@ int main(int argc, char* argv[]) {
     char * act_bidder;
     unsigned int bidder_max = 0;
 
-    int i = 0;
-    int sum = 0;
+    unsigned int sum = 0;
 
     int offset = 0;
     int old_offset = 0;
@@ -112,10 +116,13 @@ int main(int argc, char* argv[]) {
         char * output;
         int oIndex = 0;
         output = (char *) malloc(sizeof(char)*1);
-        int addSize = 0;
+        if(output == NULL) {
+            printf("Error allocating memory!");
+            return -1;
+        }
     #endif
     #if LEVEL >= 4
-        int instantBuy = 0;
+        unsigned int instantBuy = 0;
         int auctionRunning = 1;
     #endif
 
@@ -134,6 +141,10 @@ int main(int argc, char* argv[]) {
     #if LEVEL >= 3
         size = offset - old_offset - 1;
         helperArray = (char *) malloc(sizeof(char) * size);
+        if(helperArray == NULL) {
+            printf("Error allocating memory!");
+            return -1;
+        }
         output = createOutputArray(output, "-", &oIndex);
         intToChar(helperArray, price, TRUE);
         output = createOutputArray(output, helperArray, &oIndex);
@@ -163,12 +174,16 @@ int main(int argc, char* argv[]) {
 
             if(sum > bidder_max) {
                 write = 1;
-                if(memcmp(highest_bidder, act_bidder, size) == 0) {
+                if(memcmp(highest_bidder, act_bidder, (size_t) size) == 0) {
                     write = 0;
                 } else if(bidder_max != 0) {
                     price = bidder_max + 1;
                 }
                 highest_bidder = (char*) realloc(highest_bidder, sizeof(char)*size);
+                if(highest_bidder == NULL) {
+                    printf("Error reallocating memory!");
+                    return -1;
+                }
                 memcpy(highest_bidder, act_bidder, 20);
 
                 bidder_max = sum;
@@ -188,13 +203,16 @@ int main(int argc, char* argv[]) {
             }
             #endif
 
-            sum = 0;
         }
 
         #if LEVEL >= 3
         if(write != 0) {
             output = createOutputArray(output, highest_bidder, &oIndex);
             helperArray = (char*) realloc(helperArray, sizeof(char)*size);
+            if(helperArray == NULL) {
+                printf("Error reallocating memory!");
+                return -1;
+            }
             intToChar(helperArray, price, TRUE);
             output = createOutputArray(output, helperArray, &oIndex);
         }
