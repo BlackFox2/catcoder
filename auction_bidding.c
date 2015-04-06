@@ -29,10 +29,10 @@ int main(int argc, char* argv[]) {
     int length = 0;
     int bid_count = 0;
     int bidder_count = 0;
-    int price = 0;
-    char highest_bidder[20];
-    char act_bidder[20];
-    int bidder_max = 0;
+    unsigned int price = 0;
+    char highest_bidder[30];
+    char act_bidder[30];
+    unsigned int bidder_max = 0;
 
     int bids[10];
     char bidders[5];
@@ -40,12 +40,15 @@ int main(int argc, char* argv[]) {
     int sum = 0;
 
     int temp = 0;
-    char helperArray[10];
-    char output[100];
+    char helperArray[200];
+    char output[300];
     int oIndex = 0;
     int write = 0;
+    int instantBuy = 0;
+    int auctionRunning = 1;
+    int y = 0;
 
-
+    //get start bid
     while(argv[1][length] >= '0' && argv[1][length] <= '9') {
         length++;
     }
@@ -61,9 +64,23 @@ int main(int argc, char* argv[]) {
         helperArray[temp++] = (num%10)+'0';
     }
     helperArray[temp] = '\0';
+    for(int x = 0; x < temp/2; x++) {
+        int helper = helperArray[x];
+        helperArray[x] = helperArray[temp-1-x];
+        helperArray[temp-1-x] = helper;
+    }
     createOutputArray(output, 100, helperArray, &oIndex);
+    length++;
+    y = length;
+    //get instant buy price
+    while(argv[1][length] >= '0' && argv[1][length] <= '9') {
+        length++;
+    }
+    for(; y < length; y++) {
+        instantBuy += (argv[1][y]-'0') * pow(10, length-y-1);
+    }
 
-    while(argv[1][length] != '\0') {
+    while(argv[1][length] != '\0' && auctionRunning) {
 
 
         if(argv[1][length] >= 'A' && argv[1][length] <= 'Z' || argv[1][length] >= 'a' && argv[1][length] <= 'z') {
@@ -99,15 +116,23 @@ int main(int argc, char* argv[]) {
                 write=1;
 
             }
+            if(price >= instantBuy && instantBuy != 0) {
+                price = instantBuy;
+                auctionRunning = 0;
+            }
             if(write != 0) {
                 createOutputArray(output, 100, highest_bidder, &oIndex);
 
-                //TODO bring numbers in correct order
                 temp = 0;
                 for (int num = price; num != 0; num = num / 10) {
                     helperArray[temp++] = (num % 10) + '0';
                 }
                 helperArray[temp] = '\0';
+                for(int x = 0; x < temp/2; x++) {
+                    int helper = helperArray[x];
+                    helperArray[x] = helperArray[temp-1-x];
+                    helperArray[temp-1-x] = helper;
+                }
                 createOutputArray(output, 100, helperArray, &oIndex);
             }
 
