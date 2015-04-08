@@ -271,5 +271,10 @@ int main(int argc, char* argv[]) {
         printf("%s,%d\n", highest_bidder, price);
     #endif
 
+    free(highest_bidder);
+    free(act_bidder);
+    free(helperArray);
+    free(output);
+
     return 0;
 }
